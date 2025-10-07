@@ -9,4 +9,7 @@ This is the translated and extended version of AudioPlayer for **SCP: Secret Lab
 ## Plugins Overview
 
 ## 🔊Audio Playback
-(https://github.com/Antoniofo/AudioPlayer)
+[Usage Method (Author Library)](https://github.com/Antoniofo/AudioPlayer)
+•A setting called 'Volume' has been added to the config, which can be adjusted to change the audio playback volume in round
+## ⚠Note
+It also requires AudioPlayer's dependencies
