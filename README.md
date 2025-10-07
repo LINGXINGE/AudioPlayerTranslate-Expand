@@ -16,4 +16,4 @@ It also requires AudioPlayer's dependencies
 
 ## Original author：Antoniofo
 ## Translate author：NekAtimo\小鲨鱼
-## IF you find some issue,you can send an email at 1801665309@qq.com
+If you find some issue,you can send an email to 1801665309@qq.com
