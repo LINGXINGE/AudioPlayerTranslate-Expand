@@ -1,5 +1,7 @@
-AudioPlayerTranslate-Expand
+## Plugin Description
 This is the translated and extended version of AudioPlayer for **SCP: Secret Laboratory (Exiled framework)**
+
+---
 
 ## Downloads:
 | Framework | Version    |  Release                                                              |
