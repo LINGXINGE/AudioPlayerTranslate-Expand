@@ -20,7 +20,7 @@ This is the translated and extended version of AudioPlayer for **SCP: Secret Lab
 
 •Added a custom event ``MusicPlayFinishEventArgs``
 
-•Added a setting that allows administrators to play custom audio without permissions.
+•Added a setting that allows administrators to play custom audio without permissions
 
 ---
 
