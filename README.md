@@ -43,15 +43,15 @@ This is a **Chinese-localized and feature-extended** version of the original Aud
 ---
 
 ## Core Features
-🔊 **Enhanced Audio Control**
+ **Enhanced Audio Control**
 - Added `Volume` config option (0.0 ~ 1.0) to adjust global audio playback volume
 - Support for `ps`-prefixed console commands (see [Command Usage](#command-usage))
 
-🛠️ **Custom Events & Permissions**
-- New custom event: `MusicPlayFinishEventArgs` (triggered when audio playback completes)
+ **Custom Events & Permissions**
+- New custom events (please look code)
 - Admin permission bypass: Allow admins to play custom audio without additional permissions
 
-📝 **Quality of Life**
+ **Quality of Life**
 - Full Chinese localization for configs and in-game prompts
 - Extended audio management commands (list/remove/clear loaded audio)
 
@@ -79,33 +79,225 @@ All commands use the `ps` prefix (supports server console/remote admin tools).
 
 ## Event Examples
 ### 1. MusicPlayFinish Event
-Triggered when audio playback completes (custom logic can be added):
-
+Triggered when audio playback completes.
 <details>
 <summary>Click to expand code example</summary>
 
 ```csharp
-using Exiled.Events.EventArgs;
 using Exiled.API.Features;
+using AudioPlayerManager;
 
 namespace YourPluginNamespace
 {
     public class AudioEventHandler
     {
-        // Register the event (add this to your plugin's OnEnabled method)
         public void RegisterEvents()
         {
-            AudioPlayerTranslateExpand.Events.OnMusicFinish += OnMusicFinish;
+            AudioCustomEvent.MusicPlayFinish += OnMusicPlayFinish;
         }
 
-        // Event handler
-        public static void OnMusicFinish(MusicPlayFinishEventArgs ev)
+        public void OnMusicPlayFinish(MusicPlayFinishEventArgs ev)
         {
-            // Log debug info
-            Log.Debug($"Audio playback completed: {ev.AudioName}");
-            
-            // Example: Send broadcast to all players
-            Broadcast.SendToAll($"Audio {ev.AudioName} finished playing!", 5);
+            Log.Debug($"Audio playback completed: {ev.ClipName}");
+            Broadcast.SendToAll($"Audio {ev.ClipName} finished playing!", 5);
         }
     }
 }
+```
+</details>
+
+### 2. AudioPlayStart Event
+Triggered when audio starts playing.
+<details>
+<summary>Click to expand code example</summary>
+
+```csharp
+using Exiled.API.Features;
+using AudioPlayerManager;
+using UnityEngine;
+
+namespace YourPluginNamespace
+{
+    public class AudioEventHandler
+    {
+        public void RegisterEvents()
+        {
+            AudioCustomEvent.AudioPlayStart += OnAudioPlayStart;
+        }
+
+        public void OnAudioPlayStart(AudioPlayStartEventArgs ev)
+        {
+            Log.Debug($"Audio started: {ev.ClipName}");
+            Log.Info($"Global: {ev.IsGlobal} | From Web: {ev.FromWeb}");
+        }
+    }
+}
+```
+</details>
+
+### 3. AudioPlayStop Event
+Triggered when audio stops playing.
+<details>
+<summary>Click to expand code example</summary>
+
+```csharp
+using Exiled.API.Features;
+using AudioPlayerManager;
+using UnityEngine;
+
+namespace YourPluginNamespace
+{
+    public class AudioEventHandler
+    {
+        public void RegisterEvents()
+        {
+            AudioCustomEvent.AudioPlayStop += OnAudioPlayStop;
+        }
+
+        public void OnAudioPlayStop(AudioPlayStopEventArgs ev)
+        {
+            Log.Debug($"Audio stopped: {ev.ClipName}");
+            Broadcast.SendToAll($"Audio {ev.ClipName} has been stopped", 3);
+        }
+    }
+}
+```
+</details>
+
+### 4. AudioLoadComplete Event
+Triggered when audio is loaded successfully.
+<details>
+<summary>Click to expand code example</summary>
+
+```csharp
+using Exiled.API.Features;
+using AudioPlayerManager;
+
+namespace YourPluginNamespace
+{
+    public class AudioEventHandler
+    {
+        public void RegisterEvents()
+        {
+            AudioCustomEvent.AudioLoadComplete += OnAudioLoadComplete;
+        }
+
+        public void OnAudioLoadComplete(AudioLoadCompleteEventArgs ev)
+        {
+            Log.Debug($"Audio loaded: {ev.ClipName}");
+            Log.Info($"Source: {ev.SourcePath} | From Web: {ev.FromWeb}");
+        }
+    }
+}
+```
+</details>
+
+### 5. AudioLoadFailed Event
+Triggered when audio fails to load.
+<details>
+<summary>Click to expand code example</summary>
+
+```csharp
+using Exiled.API.Features;
+using AudioPlayerManager;
+
+namespace YourPluginNamespace
+{
+    public class AudioEventHandler
+    {
+        public void RegisterEvents()
+        {
+            AudioCustomEvent.AudioLoadFailed += OnAudioLoadFailed;
+        }
+
+        public void OnAudioLoadFailed(AudioLoadFailedEventArgs ev)
+        {
+            Log.Error($"Failed to load audio: {ev.ClipName}");
+            Log.Error($"Error: {ev.ErrorMessage}");
+        }
+    }
+}
+```
+</details>
+
+---
+
+### Full Event Registration (All Events)
+<details>
+<summary>Click to expand full example</summary>
+
+```csharp
+using Exiled.API.Features;
+using AudioPlayerManager;
+using System;
+
+namespace YourPluginNamespace
+{
+    public class YourPlugin : Plugin<Config>
+    {
+        public override string Name => "YourAudioPlugin";
+        public override string Author => "YourName";
+        public override Version Version => new(1, 0, 0);
+        public override Version RequiredExiledVersion => new(9, 12, 0);
+
+        private AudioEventHandler _handler;
+
+        public override void OnEnabled()
+        {
+            _handler = new AudioEventHandler();
+            _handler.RegisterEvents();
+            base.OnEnabled();
+        }
+
+        public override void OnDisabled()
+        {
+            _handler.UnregisterEvents();
+            _handler = null;
+            base.OnDisabled();
+        }
+    }
+
+    public class AudioEventHandler
+    {
+        public void RegisterEvents()
+        {
+            AudioCustomEvent.AudioPlayStart += OnAudioPlayStart;
+            AudioCustomEvent.AudioPlayStop += OnAudioPlayStop;
+            AudioCustomEvent.AudioLoadComplete += OnAudioLoadComplete;
+            AudioCustomEvent.AudioLoadFailed += OnAudioLoadFailed;
+            AudioCustomEvent.MusicPlayFinish += OnMusicPlayFinish;
+        }
+
+        public void UnregisterEvents()
+        {
+            AudioCustomEvent.AudioPlayStart -= OnAudioPlayStart;
+            AudioCustomEvent.AudioPlayStop -= OnAudioPlayStop;
+            AudioCustomEvent.AudioLoadComplete -= OnAudioLoadComplete;
+            AudioCustomEvent.AudioLoadFailed -= OnAudioLoadFailed;
+            AudioCustomEvent.MusicPlayFinish -= OnMusicPlayFinish;
+        }
+
+        public void OnAudioPlayStart(AudioPlayStartEventArgs ev) => 
+            Log.Debug($"Playback started: {ev.ClipName}");
+
+        public void OnAudioPlayStop(AudioPlayStopEventArgs ev) => 
+            Log.Debug($"Playback stopped: {ev.ClipName}");
+
+        public void OnAudioLoadComplete(AudioLoadCompleteEventArgs ev) => 
+            Log.Debug($"Loaded: {ev.ClipName}");
+
+        public void OnAudioLoadFailed(AudioLoadFailedEventArgs ev) => 
+            Log.Error($"Load failed: {ev.ClipName} | {ev.ErrorMessage}");
+
+        public void OnMusicPlayFinish(MusicPlayFinishEventArgs ev) => 
+            Log.Debug($"Playback finished: {ev.ClipName}");
+    }
+
+    public class Config : IConfig
+    {
+        public bool IsEnabled { get; set; } = true;
+        public bool Debug { get; set; } = false;
+    }
+}
+```
+</details>
